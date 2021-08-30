@@ -17,7 +17,16 @@ export async function getComments(
       }
 
       const { data }: CommentProps = await axios.get(`${API_URL}/comments`)
-      const result = data.filter((d) => d[body.fields] === body.value)
+      let result: CommentDataProps[]
+
+      if (typeof body.value === 'string') {
+        result = data.filter((d) =>
+          d[body.fields].toString().includes(body.value)
+        )
+      } else {
+        result = data.filter((d) => d[body.fields] === body.value)
+      }
+
       res.status(200).send(result)
     } catch (err) {
       console.log('err', err)

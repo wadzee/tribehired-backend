@@ -1,6 +1,6 @@
 export interface CommentBodyProps {
   fields: keyof CommentDataProps
-  value: string | number
+  value: any
 }
 
 export interface CommentProps {
