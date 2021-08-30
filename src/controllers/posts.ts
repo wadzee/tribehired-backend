@@ -1,41 +1,17 @@
 import { Request, Response } from 'express'
-import { API_URL } from 'src/common'
 import axios from 'axios'
-
-interface PostProps {
-  data: {
-    userId: number
-    id: number
-    title: string
-    body: string
-  }[]
-}
-
-interface CommentProps {
-  data: {
-    postId: number
-    id: number
-    name: string
-    email: string
-    body: string
-  }[]
-}
-interface GetPostsResBodyProps {
-  post_id: number
-  post_title: string
-  post_body: string
-  total_number_of_comments: number
-}
+import { API_URL } from 'src/common'
+import { PostProps, CommentProps, PostResBodyProps } from 'src/types'
 
 export async function getPosts(
   _req: Request,
-  res: Response<GetPostsResBodyProps[]>
+  res: Response<PostResBodyProps[]>
 ) {
   try {
     const posts: PostProps = await axios.get(`${API_URL}/posts`)
     const comments: CommentProps = await axios.get(`${API_URL}/comments`)
 
-    const result = posts.data.reduce((initial, current) => {
+    const result: PostResBodyProps[] = posts.data.reduce((initial, current) => {
       const noOfComments = comments.data.filter(
         (comment) => comment.postId === current.id
       )
@@ -50,7 +26,14 @@ export async function getPosts(
       return initial
     }, [])
 
-    res.status(200).send(result)
+    // test sorting by number of comments
+    // result[result.length - 1].total_number_of_comments = 10
+
+    const sorted = result.sort(
+      (a, b) => b.total_number_of_comments - a.total_number_of_comments
+    )
+
+    res.status(200).send(sorted)
   } catch (err) {
     console.log('err', err)
     res.status(400)
